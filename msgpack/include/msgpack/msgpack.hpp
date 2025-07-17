@@ -111,6 +111,11 @@ struct is_container<std::map<T, Alloc> > {
 };
 
 template<class T, class Alloc>
+struct is_container<std::multimap<T, Alloc> > {
+  static const bool value = true;
+};
+
+template<class T, class Alloc>
 struct is_container<std::unordered_map<T, Alloc> > {
   static const bool value = true;
 };
@@ -137,6 +142,11 @@ struct is_map {
 
 template<class T, class Alloc>
 struct is_map<std::map<T, Alloc> > {
+  static const bool value = true;
+};
+
+template<class T, class Alloc>
+struct is_map<std::multimap<T, Alloc> > {
   static const bool value = true;
 };
 
@@ -637,7 +647,7 @@ class Unpacker {
         MappedType value{};
         unpack_type(key);
         unpack_type(value);
-        map.insert_or_assign(key, value);
+        map.emplace(key, value);
       }
     } else if (safe_data() == map16) {
       safe_increment();
@@ -651,7 +661,7 @@ class Unpacker {
         MappedType value{};
         unpack_type(key);
         unpack_type(value);
-        map.insert_or_assign(key, value);
+        map.emplace(key, value);
       }
     } else {
       std::size_t map_size = safe_data() & 0b00001111;
@@ -661,7 +671,7 @@ class Unpacker {
         MappedType value{};
         unpack_type(key);
         unpack_type(value);
-        map.insert_or_assign(key, value);
+        map.emplace(key, value);
       }
     }
   }
