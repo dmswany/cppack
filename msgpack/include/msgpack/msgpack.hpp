@@ -795,6 +795,7 @@ inline
 void Unpacker::unpack_type(uint16_t &value) {
   if (safe_data() == uint16) {
     safe_increment();
+    value = 0;
     for (auto i = sizeof(uint16_t); i > 0; --i) {
       value += safe_data() << 8 * (i - 1);
       safe_increment();
@@ -814,12 +815,14 @@ inline
 void Unpacker::unpack_type(uint32_t &value) {
   if (safe_data() == uint32) {
     safe_increment();
+    value = 0;
     for (auto i = sizeof(uint32_t); i > 0; --i) {
       value += safe_data() << 8 * (i - 1);
       safe_increment();
     }
   } else if (safe_data() == uint16) {
     safe_increment();
+    value = 0;
     for (auto i = sizeof(uint16_t); i > 0; --i) {
       value += safe_data() << 8 * (i - 1);
       safe_increment();
@@ -839,19 +842,21 @@ inline
 void Unpacker::unpack_type(uint64_t &value) {
   if (safe_data() == uint64) {
     safe_increment();
+    value = 0;
     for (auto i = sizeof(uint64_t); i > 0; --i) {
       value += uint64_t(safe_data()) << 8 * (i - 1);
       safe_increment();
     }
   } else if (safe_data() == uint32) {
     safe_increment();
+    value = 0;
     for (auto i = sizeof(uint32_t); i > 0; --i) {
       value += uint64_t(safe_data()) << 8 * (i - 1);
       safe_increment();
     }
-    data_pointer++;
   } else if (safe_data() == uint16) {
     safe_increment();
+    value = 0;
     for (auto i = sizeof(uint16_t); i > 0; --i) {
       value += uint64_t(safe_data()) << 8 * (i - 1);
       safe_increment();
