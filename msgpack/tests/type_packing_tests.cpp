@@ -6,6 +6,15 @@
 
 #include <msgpack/msgpack.hpp>
 
+struct wrapped_multimap {
+  std::multimap<uint64_t, uint64_t> map;
+
+  template<class T>
+  void pack(T &packer_or_unpacker) {
+    packer_or_unpacker(map);
+  }
+};
+
 TEST_CASE("Nil type packing") {
   auto null_obj = std::nullptr_t{};
   auto packer = msgpack::Packer{};
@@ -241,4 +250,29 @@ TEST_CASE("Unordered map packing") {
   unpacker.process(map1);
   REQUIRE(map1[0] == map_copy[0]);
   REQUIRE(map1[1] == map_copy[1]);
+}
+
+TEST_CASE("uint64_t unpack handles uint32 payloads without desynchronizing") {
+  auto packer = msgpack::Packer{};
+  auto unpacker = msgpack::Unpacker{};
+
+  uint32_t encoded = 0x100C6;
+  packer.process(encoded);
+
+  uint64_t decoded = 99;
+  unpacker.set_data(packer.vector().data(), packer.vector().size());
+  unpacker.process(decoded);
+
+  REQUIRE(decoded == uint64_t(encoded));
+}
+
+TEST_CASE("Multimap packing survives uint32-sized mapped values") {
+  auto original = wrapped_multimap{};
+  original.map.emplace(0xFB5D1153C09FEC04ULL, 0x100C6ULL);
+  original.map.emplace(0xFB60F3071BBE1E16ULL, 0x345EULL);
+  original.map.emplace(0xFB625625306F1C00ULL, 0xE84CULL);
+
+  auto round_tripped = msgpack::unpack<wrapped_multimap>(msgpack::pack(original));
+
+  REQUIRE(round_tripped.map == original.map);
 }
